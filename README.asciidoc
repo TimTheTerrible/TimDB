@@ -1,0 +1,25 @@
+= TimDB
+
+A perl library that provides a simplified interface to perl-DBI
+
+== Features
+* Functions accept and return perlish entities
+* Transaction-aware
+* Interfaces with TimUtil
+
+== Function Highlights
+* sub TimDB::check_error - checks if any errors were recorded during the last transaction
+* sub TimDB::defer - begin a transaction
+* sub TimDB::resume - commit a transaction
+* sub TimDB::abort - roll back a transaction
+* sub TimDB::dbexec - shortcut to execute a query that is not expected to return results
+* sub TimDB::get_int - execute a query expected to return a single integer scalar
+* sub TimDB::get_str - execute a query expected to return a single string scalar
+* sub TimDB::get_hashref - execute a query expected to return a single hash
+* sub TimDB::get_hashref_array - execute a query expected to return an array of hash refs
+* sub TimDB::get_array - execute a query expected to return an array
+* sub TimDB::num_rows - returns the number of rows affected by the last executed query
+* sub TimDB::agglom_hash - combine a pair of hashes with overwrite
+
+
+
