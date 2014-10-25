@@ -12,6 +12,14 @@ use TimDB;
 
 parse_args();
 
+my $a = { foo => 1 };
+my $b = { bar => 1 };
+my $c = { %$a, %$b };
+
+debugdump(DEBUG_ALL, "c", $c);
+
+exit;
+
 my $db = TimDB->new();
 
 if ( $db->dbopen() == E_DB_NO_ERROR ) {
@@ -29,13 +37,6 @@ if ( $db->dbopen() == E_DB_NO_ERROR ) {
 }
 else {
     debugprint(DEBUG_ERROR, "Connect failed: '%s'", $db->{errstr});
+    debugprint(DEBUG_INFO, "FYI: test.pl assumes that the default MySQL test database exists andis world-writable.");
 }
 
-my %hash = ();
-$db->get_hashref(\%hash, "select * from transactions where id=19045");
-
-debugdump(DEBUG_DUMP, "hash", \%hash);
-
-#my $int = 0;
-#$db->get_int(\$int, "select count(*) from transactions where id=-1");
-#debugprint(DEBUG_TRACE, "int = '%s'", $int)
