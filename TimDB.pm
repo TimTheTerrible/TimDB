@@ -532,7 +532,16 @@ sub TimDB::get_hashref
         if ( ($returnval = $self->execute($query)) == E_DB_NO_ERROR ) {
 
             # Fetch the first (and hopefully, only) row...
-            %$hashref = %{$self->{sth}->fetchrow_hashref('NAME_lc')} or $returnval = E_DB_NO_ROWS;
+	    my $result = $self->{sth}->fetchrow_hashref('NAME_lc');
+
+            if ( defined($result) ) {
+                %$hashref = %{$result};
+            }
+            else {
+                debugprint(DEBUG_DB, "Query returned no results");
+                $returnval = E_DB_NO_ROWS;
+            }
+
             debugdump(DEBUG_DUMP, "hashref", $hashref);
 
             $self->{sth}->finish();
