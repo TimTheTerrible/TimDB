@@ -464,7 +464,16 @@ sub TimDB::get_int
 
         # Execute the query...
         if ( ($returnval = $self->execute($query)) == E_DB_NO_ERROR ) {
-            $$num = $self->{sth}->fetchrow() or $returnval = E_DB_NO_ROWS;
+
+            my $result = $self->{sth}->fetchrow();
+
+            if ( defined($result) ) {
+                $$num = $result;
+            }
+            else {
+                $returnval = E_DB_NO_ROWS;
+            }
+            
             $self->{sth}->finish();
         }
         else {
