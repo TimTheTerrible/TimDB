@@ -316,7 +316,7 @@ sub TimDB::resume
         $self->{dbh}->commit();
 
         # Make sure it worked...
-        if ( ($returnval = $self->check_error($returnval) != E_DB_NO_ERROR ) {
+        if ( ($returnval = $self->check_error($returnval)) != E_DB_NO_ERROR ) {
             debugprint(DEBUG_ERROR, "Failed to commit transactions: '%s'", $self->{dbh}->errstr());
 
             # Close the connection; it's crap now anyway...
