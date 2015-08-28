@@ -348,7 +348,7 @@ sub TimDB::abort
         debugprint(DEBUG_DB, "Rolling back deferred transactions...");
         $self->{dbh}->rollback();
 
-        if ( ($returnval = $self->check_error($returnval) != E_DB_NO_ERROR ) {
+        if ( ($returnval = $self->check_error($returnval)) != E_DB_NO_ERROR ) {
             debugprint(DEBUG_ERROR, "Failed to roll back transactions: '%s'", $self->{dbh}->errstr());
 
             # Close the connection; it's crap now anyway...
