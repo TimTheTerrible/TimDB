@@ -1,4 +1,4 @@
-PERLDIR="/usr/local/share/perl5/"
+PERLDIR="/usr/local/lib64/perl5/"
 TARGET="TimDB.pm"
 
 install:
