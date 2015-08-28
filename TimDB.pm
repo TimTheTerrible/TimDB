@@ -267,6 +267,22 @@ sub TimDB::check_error
     return $returnval;
 }
 
+# TimDB::reset
+sub TimDB::reset
+{
+    my $self = shift;
+    my $returnval = E_DB_NO_ERROR;
+
+    debugprint(DEBUG_TRACE, "Entering...");
+
+    $self->dbclose();
+    $self->{state} = STATE_CLOSED;
+
+    debugprint(DEBUG_TRACE, "Returning: %s", error_message($returnval));
+
+    return $returnval;
+}
+
 # TimDB::defer
 sub TimDB::defer
 {
