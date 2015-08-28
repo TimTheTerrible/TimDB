@@ -13,10 +13,10 @@ use TimDB;
 parse_args();
 
 my $dsn = {
-    dbhost	=> "wotan.algernonsystems.com",
-    dbname	=> "falkland2",
-    dbuser	=> "postgres",
-    dbpass	=> qw/@myPig0peN6/,
+    dbhost	=> "localhost",
+    dbname	=> "test",
+    dbuser	=> "root",
+    dbpass	=> qw/foo/,
     dbbackend	=> "Pg",
     dbport	=> 5432,
 };
