@@ -275,6 +275,7 @@ sub TimDB::reset
 
     debugprint(DEBUG_TRACE, "Entering...");
 
+    $self->{dbh}->set_err(undef,undef);
     $self->dbclose();
     $self->{state} = STATE_CLOSED;
 
