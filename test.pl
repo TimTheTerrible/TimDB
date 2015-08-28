@@ -12,25 +12,30 @@ use TimDB;
 
 parse_args();
 
-my $a = { foo => 1 };
-my $b = { bar => 1 };
-my $c = { %$a, %$b };
+my $dsn = {
+    dbhost	=> "wotan.algernonsystems.com",
+    dbname	=> "falkland2",
+    dbuser	=> "postgres",
+    dbpass	=> qw/@myPig0peN6/,
+    dbbackend	=> "Pg",
+    dbport	=> 5432,
+};
 
-debugdump(DEBUG_ALL, "c", $c);
-
-exit;
-
-my $db = TimDB->new();
+my $db = TimDB->new($dsn);
 
 if ( $db->dbopen() == E_DB_NO_ERROR ) {
 
-    my $result = [];
+    my $returnval = E_NO_ERROR;
+    my $result = 0;
 
-    if ( $db->get_hashref_array($result,"SELECT User,Host FROM user") == E_DB_NO_ERROR ) {
-        debugdump(DEBUG_TRACE, "result", $result);
+    if ( ($returnval = $db->get_int(\$result,"SELECT size FROM missing_files WHERE asset_id=1969620709001")) == E_DB_NO_ERROR ) {
+        debugprint(DEBUG_TRACE, "result = %s", $result);
+    }
+    elsif ( $returnval == E_DB_NO_ROWS ) {
+        debugprint(DEBUG_WARN, "No rows returned");
     }
     else {
-        debugprint(DEBUG_ERROR, "get_hashref() Failed!");
+        debugprint(DEBUG_ERROR, "get_int() Failed!");
     }    
 
     $db->dbclose();

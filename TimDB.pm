@@ -227,7 +227,7 @@ sub TimDB::dbclose
     debugprint(DEBUG_TRACE, "Entering...");
 
     # Check the error status and record it...
-    $self->check_error();
+    $self->check_error(0);
 
     # Disconnect...
     if ( $self->{state} == STATE_OPEN ) {
@@ -249,7 +249,11 @@ sub TimDB::dbclose
 sub TimDB::check_error
 {
     my $self = shift;
-    my $returnval = E_DB_NO_ERROR;
+
+    # This is so that check_error() only overwrites $returnval if there's an error...
+    my ($returnval) = @_;
+
+    debugprint(DEBUG_TRACE, "Entering...");
 
     if ( $DBI::err ) {
         $self->{errstr} = $DBI::errstr;
@@ -257,6 +261,8 @@ sub TimDB::check_error
         $returnval = E_DB_INVALID_STATE;
         debugprint(DEBUG_ERROR, "DBI Error detected: %s", $self->{errstr});
     }
+
+    debugprint(DEBUG_TRACE, "Returning: %s", error_message($returnval));
 
     return $returnval;
 }
@@ -277,7 +283,7 @@ sub TimDB::defer
         $self->{dbh}->begin_work();
 
         # Make sure it worked...
-        if ( ($returnval = $self->check_error()) != E_DB_NO_ERROR ) {
+        if ( ($returnval = $self->check_error($returnval)) != E_DB_NO_ERROR ) {
             debugprint(DEBUG_ERROR, "Failed to enable transactions: '%s'", $self->{dbh}->errstr());
 
             # Close the connection; it's crap now anyway...
@@ -310,7 +316,7 @@ sub TimDB::resume
         $self->{dbh}->commit();
 
         # Make sure it worked...
-        if ( ($returnval = $self->check_error()) != E_DB_NO_ERROR ) {
+        if ( ($returnval = $self->check_error($returnval) != E_DB_NO_ERROR ) {
             debugprint(DEBUG_ERROR, "Failed to commit transactions: '%s'", $self->{dbh}->errstr());
 
             # Close the connection; it's crap now anyway...
@@ -342,7 +348,7 @@ sub TimDB::abort
         debugprint(DEBUG_DB, "Rolling back deferred transactions...");
         $self->{dbh}->rollback();
 
-        if ( ($returnval = $self->check_error()) != E_DB_NO_ERROR ) {
+        if ( ($returnval = $self->check_error($returnval) != E_DB_NO_ERROR ) {
             debugprint(DEBUG_ERROR, "Failed to roll back transactions: '%s'", $self->{dbh}->errstr());
 
             # Close the connection; it's crap now anyway...
@@ -412,7 +418,7 @@ sub TimDB::execute
     }
 
     # Just in case...
-    $self->check_error();
+    $returnval = $self->check_error($returnval);
 
     debugprint(DEBUG_TRACE, "Returning: %s", error_message($returnval));
 
@@ -436,7 +442,7 @@ sub TimDB::dbexec
         $self->{rows} = $self->{dbh}->do($query);
         debugprint(DEBUG_DB, "%d rows affected", $self->{rows});
 
-        $self->check_error();
+        $returnval = $self->check_error($returnval);
 
         # Don't do this, it breaks transactions...
         # $self->dbclose();
