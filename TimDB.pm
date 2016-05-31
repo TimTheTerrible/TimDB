@@ -91,8 +91,8 @@ my %States = (
 # DSN
 our $DBHost = "localhost";
 our $DBPort = 3306;
-our $DBName = "mysql";
-our $DBUser = "mysql";
+our $DBName = "test";
+our $DBUser = "$ENV{USERNAME}";
 our $DBPasswd = "";
 our $DBBackEnd = "mysql";
 
@@ -106,11 +106,11 @@ my %ParamDefs = (
         comment => "Hostname of database server",
     },
     "dbport" => {
-        name	=> "TCP Port on Database Host",
+        name	=> "Databse Port",
         type	=> PARAMTYPE_INT,
         var	=> \$DBPort,
         usage   => "--dbport",
-        comment => "MySQL TCP Port on database server",
+        comment => "Database TCP listen port",
     },
     "dbname" => {
         name	=> "Database Name",
@@ -134,11 +134,12 @@ my %ParamDefs = (
         comment => "Password to supply when connecting to database",
     },
     "dbbackend" => {
-        name	=> "Database Back End (MySQL; PgSQL)",
+        name	=> "Database Back End",
         type	=> PARAMTYPE_STRING,
         var	=> \$DBBackEnd,
         usage   => "--dbbackend",
-        comment => "Database Back End driver to use when connectiong to database server",
+        comment => sprintf("Database Back End driver (%s)",
+            join(', ', map({chomp($_);(split('-', $_))[2]} qx(rpm -qa | grep perl-DBD)))),
     },
 );
 
