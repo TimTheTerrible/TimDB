@@ -9,7 +9,18 @@ use TimDB;
 # Optional args: --dbport=<port> --dbname=<database name> --dbbackend=<mysql|Pg*>
 #
 # *: Yes, the capital "P" is required: "pg" won't mut the custard.
+our $Tuna;
+my %ParamDefs = ( 
+    "tuna" => {
+        name    => "Tuna",
+        type    => PARAMTYPE_STRING,
+        var     => \$Tuna,
+        usage   => "--tuna|-t",
+        comment => "The name of the fish",
+    },
+);
 
+register_params(\%ParamDefs);
 parse_args();
 
 my $dsn = {
