@@ -92,7 +92,7 @@ my %States = (
 our $DBHost = "localhost";
 our $DBPort = 3306;
 our $DBName = "test";
-our $DBUser = "$ENV{USERNAME}";
+our $DBUser = "$ENV{USER}";
 our $DBPasswd = "";
 our $DBBackEnd = "mysql";
 
