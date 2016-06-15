@@ -730,22 +730,33 @@ sub TimDB::query
 {
     my $self = shift;
 
-    my ($args) = @_;
+    my ($queryspec) = @_;
+
+    debugdump(DEBUG_DUMP, "queryspec", $queryspec);
 
     my $result = "";
 
-    debugdump(DEBUG_DUMP, "args", $args);
-
-    if ( $args->{action} == ACTION_SELECT ) {
-        $result = sprintf("SELECT %s FROM %s", $args->{select}, $args->{join});
+    if ( $queryspec->{action} == ACTION_SELECT ) {
+        $result = sprintf("SELECT %s FROM %s", $queryspec->{select}, $queryspec->{join});
     }
     else {
-        debugprint(DEBUG_ERROR, "Unimplemented action: '%s'", $args->{action});
+        debugprint(DEBUG_ERROR, "Unimplemented action: '%s'", $queryspec->{action});
+        return undef;
     }
 
-    $result .= sprintf(" WHERE %s", $args->{where}) if defined($args->{where});
-    $result .= sprintf(" ORDER BY %s", $args->{order}) if defined($args->{order});
-    $result .= sprintf(" LIMIT %s", $args->{limit}) if defined($args->{limit});
+    if ( defined($queryspec->{where}) ) {
+        $result .= " WHERE ";
+        my $clause = "";
+        foreach my $where ( @{$queryspec->{where}} ) {
+            $clause .= " AND " unless $clause eq "";
+            $clause .= $where;
+        }
+        $result .= $clause;
+    }
+
+    $result .= sprintf(" GROUP BY %s", $queryspec->{group}) if defined($queryspec->{group});
+    $result .= sprintf(" ORDER BY %s", $queryspec->{order}) if defined($queryspec->{order});
+    $result .= sprintf(" LIMIT %s", $queryspec->{limit}) if defined($queryspec->{limit});
 
     debugprint(DEBUG_TRACE, "Returning '%s'", $result);
     return $result;
