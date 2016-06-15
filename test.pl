@@ -43,8 +43,8 @@ if ( $db->dbopen() == E_DB_NO_ERROR ) {
         select => "*",
         join => "foo",
         where => "bar != 0",
-        order => "baz",
-        limit => "1",
+        limit => "3",
+        order => "bar",
     };
 
     my $query = $db->query($queryspec);
@@ -57,7 +57,7 @@ if ( $db->dbopen() == E_DB_NO_ERROR ) {
         debugprint(DEBUG_WARN, "No rows returned");
     }
     else {
-        debugprint(DEBUG_ERROR, "get_int() Failed!");
+        debugprint(DEBUG_ERROR, "get_hashref_array() Failed!");
     }    
 
     $db->dbclose();

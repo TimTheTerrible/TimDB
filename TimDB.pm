@@ -744,6 +744,7 @@ sub TimDB::query
     }
 
     $result .= sprintf(" WHERE %s", $args->{where}) if defined($args->{where});
+    $result .= sprintf(" ORDER BY %s", $args->{order}) if defined($args->{order});
     $result .= sprintf(" LIMIT %s", $args->{limit}) if defined($args->{limit});
 
     debugprint(DEBUG_TRACE, "Returning '%s'", $result);
