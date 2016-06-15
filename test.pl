@@ -26,8 +26,8 @@ parse_args();
 my $dsn = {
     dbhost	=> "localhost",
     dbname	=> "test",
-    dbuser	=> "root",
-    dbpass	=> qw/foo/,
+    dbuser	=> "test",
+    dbpass	=> qw/test/,
     dbbackend	=> "Pg",
     dbport	=> 5432,
 };
@@ -37,10 +37,21 @@ my $db = TimDB->new($dsn);
 if ( $db->dbopen() == E_DB_NO_ERROR ) {
 
     my $returnval = E_NO_ERROR;
-    my $result = 0;
 
-    if ( ($returnval = $db->get_int(\$result,"SELECT size FROM missing_files WHERE asset_id=1969620709001")) == E_DB_NO_ERROR ) {
-        debugprint(DEBUG_TRACE, "result = %s", $result);
+    my $queryspec = {
+        action => ACTION_SELECT,
+        select => "*",
+        join => "foo",
+        where => "bar != 0",
+        order => "baz",
+        limit => "1",
+    };
+
+    my $query = $db->query($queryspec);
+
+    my $result = [];
+    if ( ($returnval = $db->get_hashref_array($result,$query)) == E_DB_NO_ERROR ) {
+        debugdump(DEBUG_DUMP, "result", $result);
     }
     elsif ( $returnval == E_DB_NO_ROWS ) {
         debugprint(DEBUG_WARN, "No rows returned");

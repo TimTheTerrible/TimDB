@@ -18,6 +18,9 @@ our @EXPORT = qw(
     E_DB_PREPARE_FAILED
     E_DB_EXECUTE_FAILED
     E_DB_NO_ROWS
+    ACTION_SELECT
+    ACTION_UPDATE
+    ACTION_DELETE
     $DBHost
     $DBPort
     $DBUser
@@ -76,6 +79,11 @@ my %ErrorMessages = (
         message => "No DB rows returned",
     },
 );
+
+# Query Actions
+use constant ACTION_SELECT => 1;
+use constant ACTION_UPDATE => 2;
+use constant ACTION_DELETE => 3;
 
 # object state
 use constant STATE_CLOSED	=> 0;
@@ -138,8 +146,8 @@ my %ParamDefs = (
         type	=> PARAMTYPE_STRING,
         var	=> \$DBBackEnd,
         usage   => "--dbbackend",
-        comment => sprintf("Database Back End driver (%s)",
-            join(', ', map({chomp($_);(split('-', $_))[2]} qx(rpm -qa | grep perl-DBD)))),
+        comment => sprintf("Database Back End driver (%s)",""), # This seemed like such a good idea...
+            #join(', ', map({chomp($_);(split('-', $_))[2]} qx(rpm -qa | grep perl-DBD)))),
     },
 );
 
@@ -714,6 +722,31 @@ sub TimDB::agglom_hash
 
     chop($result);
 
+    return $result;
+}
+
+# TimDB::query
+sub TimDB::query
+{
+    my $self = shift;
+
+    my ($args) = @_;
+
+    my $result = "";
+
+    debugdump(DEBUG_DUMP, "args", $args);
+
+    if ( $args->{action} == ACTION_SELECT ) {
+        $result = sprintf("SELECT %s FROM %s", $args->{select}, $args->{join});
+    }
+    else {
+        debugprint(DEBUG_ERROR, "Unimplemented action: '%s'", $args->{action});
+    }
+
+    $result .= sprintf(" WHERE %s", $args->{where}) if defined($args->{where});
+    $result .= sprintf(" LIMIT %s", $args->{limit}) if defined($args->{limit});
+
+    debugprint(DEBUG_TRACE, "Returning '%s'", $result);
     return $result;
 }
 
