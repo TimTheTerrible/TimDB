@@ -8,7 +8,6 @@ use TimDB;
 # Usage: ./test.pl --debug=all --dbhost=<test database host> --dbuser=<user> --dbpasswd=<user's password>
 # Optional args: --dbport=<port> --dbname=<database name> --dbbackend=<mysql|Pg*>
 #
-# *: Yes, the capital "P" is required: "pg" won't mut the custard.
 our $Tuna;
 my %ParamDefs = ( 
     "tuna" => {
@@ -32,25 +31,28 @@ my $dsn = {
     dbport	=> 5432,
 };
 
-my $db = TimDB->new($dsn);
+my $DB = TimDB->new($dsn);
 
-if ( $db->dbopen() == E_DB_NO_ERROR ) {
+if ( $DB->dbopen() == E_DB_NO_ERROR ) {
 
     my $returnval = E_NO_ERROR;
 
     my $queryspec = {
-        action => ACTION_SELECT,
-        select => "*",
-        join => "foo",
-        where => "bar != 0",
-        limit => "3",
-        order => "bar",
+        action	=> ACTION_SELECT,
+        select	=> "*",
+        join	=> "foo",
+        where	=> [
+            "bar != 0",
+            "baz not like '%mumble%'",
+        ],
+        limit	=> "3",
+        order	=> "bar",
     };
 
-    my $query = $db->query($queryspec);
+    my $query = $DB->query($queryspec);
 
     my $result = [];
-    if ( ($returnval = $db->get_hashref_array($result,$query)) == E_DB_NO_ERROR ) {
+    if ( ($returnval = $DB->get_hashref_array($result,$query)) == E_DB_NO_ERROR ) {
         debugdump(DEBUG_DUMP, "result", $result);
     }
     elsif ( $returnval == E_DB_NO_ROWS ) {
@@ -60,10 +62,10 @@ if ( $db->dbopen() == E_DB_NO_ERROR ) {
         debugprint(DEBUG_ERROR, "get_hashref_array() Failed!");
     }    
 
-    $db->dbclose();
+    $DB->dbclose();
 }
 else {
-    debugprint(DEBUG_ERROR, "Connect failed: '%s'", $db->{errstr});
-    debugprint(DEBUG_INFO, "FYI: test.pl assumes that the default MySQL test database exists andis world-writable.");
+    debugprint(DEBUG_ERROR, "Connect failed: '%s'", $DB->{errstr});
+    debugprint(DEBUG_INFO, "FYI: test.pl assumes that the included test database exists and is world-readable.");
 }
 
