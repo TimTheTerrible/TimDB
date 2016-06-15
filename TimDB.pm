@@ -19,6 +19,7 @@ our @EXPORT = qw(
     E_DB_EXECUTE_FAILED
     E_DB_NO_ROWS
     ACTION_SELECT
+    ACTION_INSERT
     ACTION_UPDATE
     ACTION_DELETE
     $DBHost
@@ -83,7 +84,8 @@ my %ErrorMessages = (
 # Query Actions
 use constant ACTION_SELECT => 1;
 use constant ACTION_UPDATE => 2;
-use constant ACTION_DELETE => 3;
+use constant ACTION_INSERT => 3;
+use constant ACTION_DELETE => 4;
 
 # object state
 use constant STATE_CLOSED	=> 0;
@@ -738,6 +740,12 @@ sub TimDB::query
 
     if ( $queryspec->{action} == ACTION_SELECT ) {
         $result = sprintf("SELECT %s FROM %s", $queryspec->{select}, $queryspec->{join});
+    }
+    elsif ( $queryspec->{action} == ACTION_UPDATE ) {
+        $result = sprintf("UPDATE %s SET %s", $queryspec->{join}, $queryspec->{update});
+    }
+    elsif ( $queryspec->{action} == ACTION_INSERT ) {
+        $result = sprintf("INSERT INTO %s (%s) VALUES(%s)", $queryspec->{join}, $queryspec->{columns}, $queryspec->{values});
     }
     else {
         debugprint(DEBUG_ERROR, "Unimplemented action: '%s'", $queryspec->{action});
