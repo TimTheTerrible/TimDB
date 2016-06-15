@@ -37,6 +37,7 @@ if ( $DB->dbopen() == E_DB_NO_ERROR ) {
 
     my $returnval = E_NO_ERROR;
 
+    # Select some things...
     my $queryspec = {
         action	=> ACTION_SELECT,
         select	=> "*",
@@ -47,6 +48,31 @@ if ( $DB->dbopen() == E_DB_NO_ERROR ) {
         ],
         limit	=> "3",
         order	=> "bar",
+    };
+
+    my $query = $DB->query($queryspec);
+
+    my $result = [];
+    if ( ($returnval = $DB->get_hashref_array($result,$query)) == E_DB_NO_ERROR ) {
+        debugdump(DEBUG_DUMP, "result", $result);
+    }
+    elsif ( $returnval == E_DB_NO_ROWS ) {
+        debugprint(DEBUG_WARN, "No rows returned");
+    }
+    else {
+        debugprint(DEBUG_ERROR, "get_hashref_array() Failed!");
+    }    
+
+    # Update some things...
+    my $queryspec = {
+        action	=> ACTION_UPDATE,
+        join	=> "foo",
+        update	=> "baz=bar",
+        where	=> [
+            "bar > 1000",
+            "bar < 2000",
+            "baz not like '%am%'",
+        ],
     };
 
     my $query = $DB->query($queryspec);
