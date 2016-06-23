@@ -8,7 +8,6 @@ use TimDB;
 # Usage: ./test.pl --debug=all --dbhost=<test database host> --dbuser=<user> --dbpasswd=<user's password>
 # Optional args: --dbport=<port> --dbname=<database name> --dbbackend=<mysql|Pg*>
 #
-# *: Yes, the capital "P" is required: "pg" won't mut the custard.
 our $Tuna;
 my %ParamDefs = ( 
     "tuna" => {
@@ -26,33 +25,73 @@ parse_args();
 my $dsn = {
     dbhost	=> "localhost",
     dbname	=> "test",
-    dbuser	=> "root",
-    dbpass	=> qw/foo/,
+    dbuser	=> "test",
+    dbpass	=> qw/test/,
     dbbackend	=> "Pg",
     dbport	=> 5432,
 };
 
-my $db = TimDB->new($dsn);
+my $DB = TimDB->new($dsn);
 
-if ( $db->dbopen() == E_DB_NO_ERROR ) {
+if ( $DB->dbopen() == E_DB_NO_ERROR ) {
 
     my $returnval = E_NO_ERROR;
-    my $result = 0;
 
-    if ( ($returnval = $db->get_int(\$result,"SELECT size FROM missing_files WHERE asset_id=1969620709001")) == E_DB_NO_ERROR ) {
-        debugprint(DEBUG_TRACE, "result = %s", $result);
+    # Select some things...
+    my $queryspec = {
+        action	=> ACTION_SELECT,
+        select	=> "*",
+        join	=> "foo",
+        where	=> [
+            "bar != 0",
+            "baz not like '%mumble%'",
+        ],
+        limit	=> "3",
+        order	=> "bar",
+    };
+
+    my $query = $DB->query($queryspec);
+
+    my $result = [];
+    if ( ($returnval = $DB->get_hashref_array($result,$query)) == E_DB_NO_ERROR ) {
+        debugdump(DEBUG_DUMP, "result", $result);
     }
     elsif ( $returnval == E_DB_NO_ROWS ) {
         debugprint(DEBUG_WARN, "No rows returned");
     }
     else {
-        debugprint(DEBUG_ERROR, "get_int() Failed!");
+        debugprint(DEBUG_ERROR, "get_hashref_array() Failed!");
     }    
 
-    $db->dbclose();
+    # Update some things...
+    my $queryspec = {
+        action	=> ACTION_UPDATE,
+        join	=> "foo",
+        update	=> "baz=bar",
+        where	=> [
+            "bar > 1000",
+            "bar < 2000",
+            "baz not like '%am%'",
+        ],
+    };
+
+    my $query = $DB->query($queryspec);
+
+    my $result = [];
+    if ( ($returnval = $DB->get_hashref_array($result,$query)) == E_DB_NO_ERROR ) {
+        debugdump(DEBUG_DUMP, "result", $result);
+    }
+    elsif ( $returnval == E_DB_NO_ROWS ) {
+        debugprint(DEBUG_WARN, "No rows returned");
+    }
+    else {
+        debugprint(DEBUG_ERROR, "get_hashref_array() Failed!");
+    }    
+
+    $DB->dbclose();
 }
 else {
-    debugprint(DEBUG_ERROR, "Connect failed: '%s'", $db->{errstr});
-    debugprint(DEBUG_INFO, "FYI: test.pl assumes that the default MySQL test database exists andis world-writable.");
+    debugprint(DEBUG_ERROR, "Connect failed: '%s'", $DB->{errstr});
+    debugprint(DEBUG_INFO, "FYI: test.pl assumes that the included test database exists and is world-readable.");
 }
 

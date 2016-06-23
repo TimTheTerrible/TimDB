@@ -18,6 +18,10 @@ our @EXPORT = qw(
     E_DB_PREPARE_FAILED
     E_DB_EXECUTE_FAILED
     E_DB_NO_ROWS
+    ACTION_SELECT
+    ACTION_INSERT
+    ACTION_UPDATE
+    ACTION_DELETE
     $DBHost
     $DBPort
     $DBUser
@@ -76,6 +80,12 @@ my %ErrorMessages = (
         message => "No DB rows returned",
     },
 );
+
+# Query Actions
+use constant ACTION_SELECT => 1;
+use constant ACTION_UPDATE => 2;
+use constant ACTION_INSERT => 3;
+use constant ACTION_DELETE => 4;
 
 # object state
 use constant STATE_CLOSED	=> 0;
@@ -138,8 +148,8 @@ my %ParamDefs = (
         type	=> PARAMTYPE_STRING,
         var	=> \$DBBackEnd,
         usage   => "--dbbackend",
-        comment => sprintf("Database Back End driver (%s)",
-            join(', ', map({chomp($_);(split('-', $_))[2]} qx(rpm -qa | grep perl-DBD)))),
+        comment => sprintf("Database Back End driver (%s)",""), # This seemed like such a good idea...
+            #join(', ', map({chomp($_);(split('-', $_))[2]} qx(rpm -qa | grep perl-DBD)))),
     },
 );
 
@@ -714,6 +724,49 @@ sub TimDB::agglom_hash
 
     chop($result);
 
+    return $result;
+}
+
+# TimDB::query
+sub TimDB::query
+{
+    my $self = shift;
+
+    my ($queryspec) = @_;
+
+    debugdump(DEBUG_DUMP, "queryspec", $queryspec);
+
+    my $result = "";
+
+    if ( $queryspec->{action} == ACTION_SELECT ) {
+        $result = sprintf("SELECT %s FROM %s", $queryspec->{select}, $queryspec->{join});
+    }
+    elsif ( $queryspec->{action} == ACTION_UPDATE ) {
+        $result = sprintf("UPDATE %s SET %s", $queryspec->{join}, $queryspec->{update});
+    }
+    elsif ( $queryspec->{action} == ACTION_INSERT ) {
+        $result = sprintf("INSERT INTO %s (%s) VALUES(%s)", $queryspec->{join}, $queryspec->{columns}, $queryspec->{values});
+    }
+    else {
+        debugprint(DEBUG_ERROR, "Unimplemented action: '%s'", $queryspec->{action});
+        return undef;
+    }
+
+    if ( defined($queryspec->{where}) ) {
+        $result .= " WHERE ";
+        my $clause = "";
+        foreach my $where ( @{$queryspec->{where}} ) {
+            $clause .= " AND " unless $clause eq "";
+            $clause .= $where;
+        }
+        $result .= $clause;
+    }
+
+    $result .= sprintf(" GROUP BY %s", $queryspec->{group}) if defined($queryspec->{group});
+    $result .= sprintf(" ORDER BY %s", $queryspec->{order}) if defined($queryspec->{order});
+    $result .= sprintf(" LIMIT %s", $queryspec->{limit}) if defined($queryspec->{limit});
+
+    debugprint(DEBUG_TRACE, "Returning '%s'", $result);
     return $result;
 }
 
