@@ -28,6 +28,7 @@ our @EXPORT = qw(
     $DBPasswd
     $DBName
     $DBBackEnd
+    DEBUG_DB
 );
 
 # Debug Modes
